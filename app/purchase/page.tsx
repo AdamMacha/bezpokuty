@@ -19,18 +19,59 @@ export default function Purchase() {
   const { language } = useLanguage();
   const { toast } = useToast();
   const [selectedPackage, setSelectedPackage] = useState('');
+  const [formData, setFormData] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    phone: '',
+    street: '',
+    city: '',
+    zipCode: '',
+  });
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Here you would typically handle the form submission,
-    // including integrating with Stripe for payment processing
-    toast({
-      title: language === 'cs' ? 'Objednávka odeslána' : 'Order Submitted',
-      description:
-        language === 'cs'
-          ? 'Děkujeme za vaši objednávku. Brzy vás budeme kontaktovat.'
-          : 'Thank you for your order. We will contact you soon.',
-    });
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ...formData }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: language === 'cs' ? 'Objednávka odeslána' : 'Order Submitted',
+          description: language === 'cs'
+            ? 'Děkujeme za vaši objednávku. Brzy vás budeme kontaktovat.'
+            : 'Thank you for your order. We will contact you soon.',
+        });
+        // Reset form after successful submission
+        setFormData({
+          email: '',
+          firstName: '',
+          lastName: '',
+          phone: '',
+          street: '',
+          city: '',
+          zipCode: '',
+        });
+        setSelectedPackage('');
+      } else {
+        throw new Error('Failed to submit order');
+      }
+    } catch (error) {
+      console.error('Error submitting order:', error);
+      toast({
+        title: language === 'cs' ? 'Chyba' : 'Error',
+        description: language === 'cs'
+          ? 'Při odesílání objednávky došlo k chybě. Zkuste to prosím znovu.'
+          : 'There was an error submitting your order. Please try again.',
+        variant: 'destructive',
+      });
+    }
   };
 
   return (
@@ -49,18 +90,19 @@ export default function Purchase() {
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
       >
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div>
+<form onSubmit={handleSubmit}>
+          <div className="mb-4">
             <Label htmlFor="package">
-              {language === 'cs' ? 'Vyberte balíček' : 'Select Package'}
+              {language === 'cs' ? 'Balíček' : 'Package'}
             </Label>
-            <Select onValueChange={setSelectedPackage} required>
+            <Select
+              value={selectedPackage}
+              onValueChange={(value) => setSelectedPackage(value)}
+            >
               <SelectTrigger>
-                <SelectValue
-                  placeholder={
-                    language === 'cs' ? 'Vyberte balíček' : 'Select a package'
-                  }
-                />
+                <SelectValue>
+                  {language === 'cs' ? 'Vyberte balíček' : 'Select a package'}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="basic">
@@ -72,52 +114,94 @@ export default function Purchase() {
               </SelectContent>
             </Select>
           </div>
-          <div>
-            <Label htmlFor="email">
-              {language === 'cs' ? 'Email' : 'Email'}
-            </Label>
-            <Input type="email" id="email" required />
+          <div className="mb-4">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+            />
           </div>
-          <div>
+          <div className="mb-4">
             <Label htmlFor="firstName">
               {language === 'cs' ? 'Jméno' : 'First Name'}
             </Label>
-            <Input id="firstName" required />
+            <Input
+              id="firstName"
+              value={formData.firstName}
+              onChange={(e) =>
+                setFormData({ ...formData, firstName: e.target.value })
+              }
+            />
           </div>
-          <div>
+          <div className="mb-4">
             <Label htmlFor="lastName">
               {language === 'cs' ? 'Příjmení' : 'Last Name'}
             </Label>
-            <Input id="lastName" required />
+            <Input
+              id="lastName"
+              value={formData.lastName}
+              onChange={(e) =>
+                setFormData({ ...formData, lastName: e.target.value })
+              }
+            />
           </div>
-          <div>
+          <div className="mb-4">
             <Label htmlFor="phone">
               {language === 'cs' ? 'Telefon' : 'Phone'}
             </Label>
-            <Input id="phone" required />
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) =>
+                setFormData({ ...formData, phone: e.target.value })
+              }
+            />
           </div>
-          <div>
+          
+          <div className="mb-4">
             <Label htmlFor="street">
-              {language === 'cs'
-                ? 'Ulice a číslo popisné'
-                : 'Street and House Number'}
+              {language === 'cs' ? 'Ulice' : 'Street'}
             </Label>
-            <Input id="street" required />
+            <Input
+              id="street"
+              value={formData.street}
+              onChange={(e) =>
+                setFormData({ ...formData, street: e.target.value })
+              }
+            />
           </div>
-          <div>
-            <Label htmlFor="city">{language === 'cs' ? 'Město' : 'City'}</Label>
-            <Input id="city" required />
+          <div className="mb-4">
+            <Label htmlFor="city">
+              {language === 'cs' ? 'Město' : 'City'}
+            </Label>
+            <Input
+              id="city"
+              value={formData.city}
+              onChange={(e) =>
+                setFormData({ ...formData, city: e.target.value })
+              }
+            />
           </div>
-          <div>
+          <div className="mb-4">
             <Label htmlFor="zipCode">
               {language === 'cs' ? 'PSČ' : 'ZIP Code'}
             </Label>
-            <Input id="zipCode" required />
+            <Input
+              id="zipCode"
+              value={formData.zipCode}
+              onChange={(e) =>
+                setFormData({ ...formData, zipCode: e.target.value })
+              }
+            />
           </div>
-          <Button type="submit" className="w-full">
-            {language === 'cs' ? 'Zakoupit nyní' : 'Buy Now'}
+          <Button type="submit" className='w-full'>
+            {language === 'cs' ? 'Odeslat' : 'Buy now'}
           </Button>
-        </form>
+      </form>
       </motion.div>
     </div>
   );
