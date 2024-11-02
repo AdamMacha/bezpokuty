@@ -14,6 +14,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import { loadStripe } from '@stripe/stripe-js';
+
+// Initialize Stripe
+const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!);
 
 export default function Purchase() {
   const { language } = useLanguage();
@@ -31,44 +35,59 @@ export default function Purchase() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!selectedPackage) {
+      toast({
+        title: language === 'cs' ? 'Chyba' : 'Error',
+        description: language === 'cs' 
+          ? 'Prosím vyberte balíček' 
+          : 'Please select a package',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
-      const response = await fetch('/api/users', {
+      // Create Stripe Checkout Session
+      const response = await fetch('/api/create-checkout-session', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ...formData }),
+        body: JSON.stringify({
+          packageType: selectedPackage,
+          formData: {
+            ...formData,
+            purchased: false, // Will be updated to true after successful payment
+          },
+        }),
       });
 
-      if (response.ok) {
-        const data = await response.json();
-        toast({
-          title: language === 'cs' ? 'Objednávka odeslána' : 'Order Submitted',
-          description: language === 'cs'
-            ? 'Děkujeme za vaši objednávku. Brzy vás budeme kontaktovat.'
-            : 'Thank you for your order. We will contact you soon.',
-        });
-        // Reset form after successful submission
-        setFormData({
-          email: '',
-          firstName: '',
-          lastName: '',
-          phone: '',
-          street: '',
-          city: '',
-          zipCode: '',
-        });
-        setSelectedPackage('');
-      } else {
-        throw new Error('Failed to submit order');
+      if (!response.ok) {
+        throw new Error('Failed to create checkout session');
       }
+
+      const { sessionId } = await response.json();
+      
+      // Redirect to Stripe Checkout
+      const stripe = await stripePromise;
+      if (!stripe) throw new Error('Stripe failed to initialize');
+
+      const { error } = await stripe.redirectToCheckout({
+        sessionId,
+      });
+
+      if (error) {
+        throw error;
+      }
+
     } catch (error) {
-      console.error('Error submitting order:', error);
+      console.error('Error:', error);
       toast({
         title: language === 'cs' ? 'Chyba' : 'Error',
         description: language === 'cs'
-          ? 'Při odesílání objednávky došlo k chybě. Zkuste to prosím znovu.'
-          : 'There was an error submitting your order. Please try again.',
+          ? 'Při zpracování platby došlo k chybě. Zkuste to prosím znovu.'
+          : 'There was an error processing your payment. Please try again.',
         variant: 'destructive',
       });
     }
