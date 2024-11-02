@@ -54,6 +54,28 @@ export default function Success() {
           }
           
           console.log('Order saved successfully');
+
+          // Send confirmation email
+          console.log('Sending confirmation email...');
+          const emailResponse = await fetch('/api/send-email', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              email: metadata.email,
+              firstName: metadata.firstName,
+              lastName: metadata.lastName,
+              language,
+            }),
+          });
+
+          if (!emailResponse.ok) {
+            console.error('Failed to send confirmation email:', await emailResponse.text());
+          } else {
+            console.log('Confirmation email sent successfully');
+          }
+
         } catch (error) {
           console.error('Detailed error:', error);
           setError(language === 'cs' 

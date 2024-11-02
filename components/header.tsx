@@ -7,6 +7,7 @@ import { useLanguage } from './language-provider';
 import { Button } from './ui/button';
 import { Moon, Sun, Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 const Header = () => {
   const { theme, setTheme } = useTheme();
@@ -28,8 +29,13 @@ const Header = () => {
   return (
     <header className="bg-background shadow-md">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <Link href="/" className="text-2xl font-bold">
-          {language === 'cs' ? 'Pojištění na pokuty' : 'Fine Insurance'}
+        <Link href="/" className="flex items-center">
+          <Image 
+            src="/logo.png" 
+            alt="Pojištění na pokuty" 
+            width={50} 
+            height={50}
+          />
         </Link>
         <div className="hidden md:flex items-center space-x-4">
           <Button variant="ghost" onClick={toggleTheme}>

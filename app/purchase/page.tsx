@@ -184,7 +184,7 @@ export default function Purchase() {
             />
           </div>
           <Button type="submit" className='w-full'>
-            {language === 'cs' ? 'Odeslat' : 'Buy now'}
+            {language === 'cs' ? 'Přejít k platbě' : 'Buy now'}
           </Button>
       </form>
       </motion.div>

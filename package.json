@@ -69,6 +69,7 @@
     "react-i18next": "^13.2.2",
     "react-resizable-panels": "^2.1.3",
     "recharts": "^2.12.7",
+    "resend": "^4.0.1-alpha.0",
     "sonner": "^1.5.0",
     "stripe": "^17.2.1",
     "tailwind-merge": "^2.5.2",
