@@ -41,7 +41,6 @@ export default function Success() {
               street: metadata.street,
               city: metadata.city,
               zipCode: metadata.zipCode,
-              packageType: metadata.packageType,
               purchased: true,
               stripeSessionId: sessionId, // Add session ID to prevent duplicates
             }),

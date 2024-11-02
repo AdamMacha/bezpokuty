@@ -35,17 +35,6 @@ export default function Purchase() {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    
-    if (!selectedPackage) {
-      toast({
-        title: language === 'cs' ? 'Chyba' : 'Error',
-        description: language === 'cs' 
-          ? 'Prosím vyberte balíček' 
-          : 'Please select a package',
-        variant: 'destructive',
-      });
-      return;
-    }
 
     try {
       // Create Stripe Checkout Session
@@ -110,29 +99,6 @@ export default function Purchase() {
         transition={{ duration: 0.5, delay: 0.2 }}
       >
 <form onSubmit={handleSubmit}>
-          <div className="mb-4">
-            <Label htmlFor="package">
-              {language === 'cs' ? 'Balíček' : 'Package'}
-            </Label>
-            <Select
-              value={selectedPackage}
-              onValueChange={(value) => setSelectedPackage(value)}
-            >
-              <SelectTrigger>
-                <SelectValue>
-                  {language === 'cs' ? 'Vyberte balíček' : 'Select a package'}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="basic">
-                  {language === 'cs' ? 'Základní' : 'Basic'}
-                </SelectItem>
-                <SelectItem value="premium">
-                  {language === 'cs' ? 'Premium' : 'Premium'}
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
           <div className="mb-4">
             <Label htmlFor="email">Email</Label>
             <Input
