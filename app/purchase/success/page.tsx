@@ -18,16 +18,18 @@ export default function Success() {
       if (sessionId && !hasOrderBeenSaved.current) {
         hasOrderBeenSaved.current = true;
         try {
-          // First, retrieve the session data from Stripe
+          console.log('Fetching session data from Stripe...');
           const stripeResponse = await fetch(`/api/checkout-session?sessionId=${sessionId}`);
           if (!stripeResponse.ok) {
+            console.error('Stripe response not OK:', await stripeResponse.text());
             throw new Error('Failed to retrieve session data');
           }
           
           const sessionData = await stripeResponse.json();
+          console.log('Session data retrieved:', sessionData);
           const { metadata } = sessionData;
 
-          // Now save the complete order to our database
+          console.log('Saving order to database...');
           const response = await fetch('/api/users', {
             method: 'POST',
             headers: {
@@ -42,15 +44,18 @@ export default function Success() {
               city: metadata.city,
               zipCode: metadata.zipCode,
               purchased: true,
-              stripeSessionId: sessionId, // Add session ID to prevent duplicates
+              stripeSessionId: sessionId,
             }),
           });
 
           if (!response.ok) {
+            console.error('Database response not OK:', await response.text());
             throw new Error('Failed to save order');
           }
+          
+          console.log('Order saved successfully');
         } catch (error) {
-          console.error('Error saving order:', error);
+          console.error('Detailed error:', error);
           setError(language === 'cs' 
             ? 'Při ukládání objednávky došlo k chybě. Kontaktujte prosím podporu.'
             : 'There was an error saving your order. Please contact support.');
